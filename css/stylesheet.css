@@ -1,0 +1,100 @@
+@font-face {
+    font-family: 'open_sanscondensed_light';
+    src: url('OpenSans-CondLight-webfont.eot');
+    src: url('OpenSans-CondLight-webfont.eot?#iefix') format('embedded-opentype'),
+         url('OpenSans-CondLight-webfont.woff') format('woff'),
+         url('OpenSans-CondLight-webfont.ttf') format('truetype'),
+         url('OpenSans-CondLight-webfont.svg#open_sanscondensed_light') format('svg');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+body {
+	margin:0px;
+	background-color: rgba(0, 0, 0, 0);
+	font-family: 'open_sanscondensed_light';
+	color:#FFFFFF;
+}
+
+#board {
+	position:absolute;
+	top:0px;
+	left:0px;
+	width:320px;
+	height:120px;
+	background-image:url('../images/nowplaying.png');
+	opacity:0;
+}
+
+
+#art {
+	position:absolute;
+	left:10px;
+	top:10px;
+	width:100px;
+	white-space:nowrap;
+	overflow:hidden;
+}
+
+#artist {
+	position:absolute;
+	left:120px;
+	top:15px;
+	width:180px;
+	font-size:20px;
+	white-space:nowrap;
+	overflow:hidden;
+}
+
+#album {
+	position:absolute;
+	left:120px;
+	top:40px;
+	width:180px;
+	font-size:14px;
+	opacity: 0.6;
+	white-space:nowrap;
+	overflow:hidden;
+}
+
+#title {
+	position:absolute;
+	left:120px;
+	top:70px;
+	width:180px;
+	font-size:14px;
+	white-space:nowrap;
+	overflow:hidden;
+}
+
+#elapsed {
+	position:absolute;
+	left:250px;
+	top:88px;
+	width:50px;
+	font-size:12px;
+	white-space:nowrap;
+	overflow:hidden;
+	text-align:right;
+}
+
+#playpaused {
+	position:absolute;
+	left:245px;
+	top:91px;
+	width:10px;
+	font-size:14px;
+	white-space:nowrap;
+	overflow:hidden;
+}
+
+#progress {
+	position:absolute;
+	left:121px;
+	top:93px;
+	width:115px;
+	height:6px;
+	background-color:#fff;
+	opacity:0.6;
+}

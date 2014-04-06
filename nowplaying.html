@@ -1,0 +1,219 @@
+<html>
+<head>
+	<link rel="stylesheet" href="css/stylesheet.css" type="text/css" charset="utf-8">
+	<script src="js/jquery-2.1.0.min.js" type="text/javascript" charset="utf-8"></script>
+	<script src="js/TweenMax.min.js" type="text/javascript" charset="utf-8"></script>
+	<script src="js/CSSPlugin.min.js" type="text/javascript" charset="utf-8"></script>
+	<script src="js/ScrollToPlugin.min.js" type="text/javascript" charset="utf-8"></script>
+	<script type="text/javascript">
+									
+			var npObj;
+		
+			var xhr = new XMLHttpRequest();
+			
+			var currPath;
+			var artPath;
+			var playState = 0;
+			
+			var fadedIn = 0;
+			
+			var progressLength;
+			
+			// imgInterval for dealing with ajax weirdness with OBS Browser Source.
+			var imgInterval;
+			
+			function init() {
+
+				xhr.overrideMimeType('application/json');
+				
+				var timeout = this.window.setInterval(function() {
+					pollHandler();
+				}, 1000);
+			
+				progressLength = $("#progress").width();
+				
+			}
+			
+			function pollHandler()
+			{
+				xhr.open('GET', "nowplaying.json?test="+Date.now(),true);
+				xhr.send();
+				xhr.onreadystatechange = function(){
+					if (xhr.readyState === 4) {
+								
+						npObj = JSON.parse(xhr.responseText);
+									
+						updateBoard();
+						
+					}
+				}
+			}
+			
+			function updateBoard() {
+				var fadein = 0;
+				if (npObj.nowplaying.playing == 1) {
+					
+					var artiststring = npObj.nowplaying.artist
+					
+					if (npObj.nowplaying.artist != npObj.nowplaying.albumartist) {
+						 artiststring += " <span style='opacity:0.6; font-size: 14px;'>(" + npObj.nowplaying.albumartist + ")</span>";
+					}
+					
+					if ($('#artist').html() != $('<div/>').html(artiststring).html()) {
+						fadeIn = 1;
+						
+						TweenMax.to($('#artist'), 0.5, {opacity: 0,onComplete: function(){
+							$('#artist').html(artiststring);
+							TweenMax.to($('#artist'), 0, {scrollTo:{x:0}});
+							TweenMax.to($('#artist'), 4, {scrollTo:{x:"max"},ease:Linear.easeNone,repeat: -1, repeatDelay:1,yoyo:true});
+						}});
+						TweenMax.to($('#artist'), 0.5, {opacity: 1, delay:0.5});
+					}
+					
+					
+					if ($('#album').html() != $('<div/>').html(npObj.nowplaying.album).html()) {
+						fadeIn = 1;
+						
+						TweenMax.to($('#album'), 0.5, {opacity: 0,onComplete: function(){
+							$('#album').html(npObj.nowplaying.album);
+							TweenMax.to($('#album'), 0, {scrollTo:{x:0}});
+							TweenMax.to($('#album'), 4, {scrollTo:{x:"max"},ease:Linear.easeNone,repeat: -1, repeatDelay:1,yoyo:true});
+						}});
+						TweenMax.to($('#album'), 0.5, {opacity: 0.6, delay:0.5});
+					}
+					
+					
+					if ($('#title').html() != $('<div/>').html(npObj.nowplaying.title).html()) {
+						fadeIn = 1;
+						
+						TweenMax.to($('#title'), 0.5, {opacity: 0,onComplete: function(){
+							$('#title').html(npObj.nowplaying.title);
+							TweenMax.to($('#title'), 0, {scrollTo:{x:0}});
+							TweenMax.to($('#title'), 4, {scrollTo:{x:"max"},ease:Linear.easeNone,repeat: -1, repeatDelay:1,yoyo:true});
+						}});
+						TweenMax.to($('#title'), 0.5, {opacity: 1, delay:0.5});
+
+					}
+					
+					if (currPath != npObj.nowplaying.path) {
+						fadeIn = 1;
+						currPath = npObj.nowplaying.path;
+						artPath = "images/empty.png"
+						imgInterval = setInterval(function(){showArt()},100);
+						$.ajax({
+							url: "/" + npObj.nowplaying.path + "/folder.jpg",
+							type:"HEAD",
+							success: function() {
+								artPath = "/" + npObj.nowplaying.path + "/folder.jpg";
+								showArt();
+							},
+							error: function() {
+								//artPath = "images/empty.png"
+								showArt();
+							}
+						});
+						
+					}
+				}
+				
+				if (playState == 1 && npObj.nowplaying.paused == 1 && npObj.nowplaying.playing == 1) {
+					playState = 0;
+					playChange();
+					fadeIn = 1;
+				} else if (playState == 1 && npObj.nowplaying.playing == 0) {
+					playState = 0;
+					playChange();
+				} else if (playState == 0 && npObj.nowplaying.paused == 0 && npObj.nowplaying.playing == 1) {
+					playState = 1;
+					playChange();
+					fadeIn = 1;
+				}
+				
+				
+				
+				var elMins = Math.floor(npObj.nowplaying.elapsed / 60);
+				var elSecs = npObj.nowplaying.elapsed - elMins * 60;
+				
+				if (elSecs < 10) {
+					elSecs = "0" + elSecs;
+				}
+				
+				var leMins = Math.floor(npObj.nowplaying.length / 60);
+				var leSecs = npObj.nowplaying.length - leMins * 60;
+				
+				if (leSecs < 10) {
+					leSecs = "0" + leSecs;
+				}
+				
+				$('#elapsed').html("<span style='opacity:0.6;'>"+ elMins + ":" + elSecs + "</span>/" + leMins + ":" + leSecs);
+				
+				var progressWidth = Math.ceil(progressLength * (npObj.nowplaying.elapsed / npObj.nowplaying.length));
+				
+				
+				$('#progress').css("width",progressWidth);
+				
+				if (fadeIn == 1) {
+					if (npObj.config.fadeout == 0) {
+						if (fadedIn == 0) {
+						
+							TweenMax.to($('#board'), 1, {opacity: 1});
+							fadedIn = 1;
+							fadeIn = 0;
+						}
+					} else {
+						fade();
+						fadeIn = 0;
+					}
+				}
+				
+			}
+			
+			function playChange() {
+				var playImg;
+				
+				if (playState == 1) {
+					playImg = "images/play.png";
+				} else {
+					playImg = "images/pause.png";
+				}
+				
+				TweenMax.to($('#playpaused'), 0.5, {opacity: 0,onComplete: function(){
+						$('#playpaused').html("<img src='" + playImg + "'>");
+					}});
+				TweenMax.to($('#playpaused'), 0.5, {opacity: 1, delay:0.5});
+			
+			}
+			
+			function showArt() {
+			
+				TweenMax.to($('#art'), 0.5, {opacity: 0,onComplete: function(){
+						$('#art').html('<img src="'+artPath+'" width="100" height="100">');
+					}});
+				TweenMax.to($('#art'), 0.5, {opacity: 1, delay:0.5});
+				clearInterval(imgInterval);
+			}
+			
+			function fade() {
+					TweenMax.killTweensOf($('#board'));
+					if (fadedIn == 0) {
+						TweenMax.to($('#board'), 1, {opacity: 1});
+						fadedIn = 1;
+					} 
+					TweenMax.to($('#board'), 1, {opacity: 0,delay: npObj.config.fadeout + 1,onComplete: function(){
+						fadedIn = 0;
+					}});
+			}
+	</script>
+</head>
+<body onLoad="init()">
+	<div id="board">
+		<div id="art"><img src="images/empty.png" width="100" height="100" style="opacity:0;"></div>
+		<div id="artist"></div>
+		<div id="album"></div>
+		<div id="title"></div>
+		<div id="elapsed"><span style="opacity:0.6;">00:00</span>/00:00</div>
+		<div id="playpaused"><img src="images/play.png"></div>
+		<div id="progress"></div>
+	</div>
+</body>
+</html>
