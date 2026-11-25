@@ -4,7 +4,9 @@ Now playing XSplit and OBS overlay for Foobar2000 by Farpenoodle
 To use, download and install the "Now Playing Simple" plugin by 
 skipyrich from the following location:
 
-http://skipyrich.com/wiki/Foobar2000:Now_Playing_Simple
+https://archive.org/details/foo_np_simple
+
+Note that this only works with the 32-bit version of foobar2000
 
 Once done, copy the following into the plugin preference screen:
 
